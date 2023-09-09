@@ -1,14 +1,77 @@
 <?php
-require "create.php";
-require "update.php";
+require "db_conn.php";
+require "abstract_model.php";
+require "employees.php";
 
-$sql = "SELECT * FROM user";
-// we use the connection to database -> sql statematn to read the select data
-$stmt = $db_connection->query($sql);
-//FETCH_PROPS_LATE ==> Call the constructor before setting properties.
-// Arguments of custom class constructor when the mode parameter is PDO::FETCH_CLASS.
-$result = $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "User", ['name', 'email', 'age', 'salary', 'address']);
-$result = is_array($result) && !empty($result) ? $result : false;
+$email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
+$age = filter_input(INPUT_POST, "age", FILTER_SANITIZE_NUMBER_INT);
+$salary = filter_input(INPUT_POST, "salary", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+$address = filter_input(INPUT_POST, "address");
+$name = filter_input(INPUT_POST, "name");
+$id = filter_input(INPUT_GET, "id", FILTER_SANITIZE_NUMBER_INT);
+$counter = 0;
+
+
+
+if (isset($_POST["submit"])) {
+    print_r($_GET);
+
+    if (isset($_GET["action"]) && $_GET["action"] == "edit" && isset($_GET["id"])) {
+        if ($id > 0) {
+            echo "Hello";
+            $user = Employees::get_by_key($id);
+            $user->name     = $name;
+            $user->age      = $age;
+            $user->salary   = $salary;
+            $user->address  = $address;
+            $user->email    = $email;
+        }
+    } else {
+        $user = new Employees($name, $email, $age, $salary, $address);
+        $user->name     = $name;
+        $user->age      = $age;
+        $user->salary   = $salary;
+        $user->address  = $address;
+        $user->email    = $email;
+    }
+
+    if (!empty($emil) || !empty($age) || !empty($salary) || !empty($address)) {
+        if ($user->save()) {
+            $msg = true;
+        }
+    } else {
+        $error = true;
+    }
+}
+
+
+if (isset($_GET["action"]) && $_GET["action"] == "edit" && isset($_GET["id"])) {
+    if ($id > 0) {
+        $user = Employees::get_by_key($id);
+    }
+}
+
+// Delete
+// if (isset($_GET["action"]) && $_GET["action"] == "delete" && isset($_GET["id"])) {
+//     if ($id > 0) {
+//         $user = Employees::get_by_key($id);
+//         if ($user->delete()) {
+//             header("Location: index.php");
+//         }
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+$result = Employees::get_all();
 
 ?>
 
@@ -93,8 +156,8 @@ $result = is_array($result) && !empty($result) ? $result : false;
                         <td><?= $val->salary ?></td>
                         <td><?= $val->address ?></td>
                         <td>
-                            <a href="/PDO/?action=edit&id=<?= $val->id ?>"><button type="button" class="btn btn-info">Edit</button></a>
-                            <a href="/PDO/?action=delete&id=<?= $val->id ?>" onclick="if(!confirm('Do you want to delete this employee ?')) return false;"><i class=" fa fa-time"></i><button type=" button" class="btn btn-danger">Delete</button></a>
+                            <a href="/employees_form/?action=edit&id=<?= $val->id ?>"><button type="button" class="btn btn-info">Edit</button></a>
+                            <!-- <a href="/employees_form/?action=delete&id=<?= $val->id ?>" onclick="if(!confirm('Do you want to delete this employee ?')) return false;"><i class=" fa fa-time"></i><button type=" button" class="btn btn-danger">Delete</button></a> -->
                         </td>
 
                     </tr>
