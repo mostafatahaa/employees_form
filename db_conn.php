@@ -15,3 +15,6 @@ class Db
         return $pdo;
     }
 }
+
+$connection = new Db();
+$db_connection = $connection->connect_db();
