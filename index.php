@@ -25,11 +25,6 @@ if (isset($_POST["submit"])) {
         }
     } else {
         $user = new Employees($name, $email, $age, $salary, $address);
-        $user->name     = $name;
-        $user->age      = $age;
-        $user->salary   = $salary;
-        $user->address  = $address;
-        $user->email    = $email;
     }
 
     if (!empty($name) || !empty($email) || !empty($age) || !empty($salary) || !empty($address)) {
@@ -155,7 +150,7 @@ $result = Employees::get_all();
                         <td><?= $val->name ?></td>
                         <td><?= $val->email ?></td>
                         <td><?= $val->age ?></td>
-                        <td><?= $val->salary ?></td>
+                        <td><?= $val->salary . " LE" ?></td>
                         <td><?= $val->address ?></td>
                         <td>
                             <a href="/employees_form/?action=edit&id=<?= $val->id ?>"><button type="button" class="btn btn-info">Edit</button></a>
