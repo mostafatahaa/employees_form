@@ -32,7 +32,6 @@ class AbstractModel
 
     // in this method we use $this keyword because it return the value of the variable($params)
     // EX: params ==> name...$this->$params ==> mostafa...and we need the value to use it in bindValue
-    // bindValue takes($parameter, $itsValue, itsType)
     public function create()
     {
         global $db_connection;
@@ -42,11 +41,6 @@ class AbstractModel
         $stmt->execute();
     }
 
-    public function save()
-    {
-        return $this->{static::$primary_key} === null ? $this->create() : $this->update();
-    }
-
     public function update()
     {
         global $db_connection;
@@ -54,6 +48,11 @@ class AbstractModel
         $stmt = $db_connection->prepare($sql);
         $this->prepare_val($stmt);
         return $stmt->execute();
+    }
+
+    public function save()
+    {
+        return $this->{static::$primary_key} === null ? $this->create() : $this->update();
     }
 
     public function delete()
@@ -72,7 +71,9 @@ class AbstractModel
 
         $sql = "SELECT * FROM " . static::$table_name;
         $stmt = $db_connection->prepare($sql);
-        return  $stmt->execute() === true ? $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, get_called_class(), array_keys(static::$table_schema)) : false;
+        $stmt->execute();
+        $result =  $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, get_called_class(), array_keys(static::$table_schema));
+        return is_array($result) && !empty($result) ? $result : false;
     }
 
     public static function get_by_key($pk)

@@ -1,24 +1,21 @@
 <?php
-require "db_conn.php";
-require "abstract_model.php";
-require "employees.php";
+session_start();
 
+require_once "db_conn.php";
+require_once "abstract_model.php";
+require_once "employees.php";
+
+$id = filter_input(INPUT_GET, "id", FILTER_SANITIZE_NUMBER_INT);
 $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
 $age = filter_input(INPUT_POST, "age", FILTER_SANITIZE_NUMBER_INT);
 $salary = filter_input(INPUT_POST, "salary", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 $address = filter_input(INPUT_POST, "address");
 $name = filter_input(INPUT_POST, "name");
-$id = filter_input(INPUT_GET, "id", FILTER_SANITIZE_NUMBER_INT);
 $counter = 0;
 
-
-
 if (isset($_POST["submit"])) {
-    print_r($_GET);
-
     if (isset($_GET["action"]) && $_GET["action"] == "edit" && isset($_GET["id"])) {
         if ($id > 0) {
-            echo "Hello";
             $user = Employees::get_by_key($id);
             $user->name     = $name;
             $user->age      = $age;
@@ -35,16 +32,24 @@ if (isset($_POST["submit"])) {
         $user->email    = $email;
     }
 
-    if (!empty($emil) || !empty($age) || !empty($salary) || !empty($address)) {
+    if (!empty($name) || !empty($email) || !empty($age) || !empty($salary) || !empty($address)) {
         if ($user->save()) {
-            $msg = true;
+            $_SESSION["msg"] = "Successflly update employee";
+            header("location: index.php");
+            session_write_close();
+            exit;
+        } else {
+            $_SESSION["msg"] = "Successflly create employee";
+            header("location: index.php");
+            session_write_close();
+            exit;
         }
     } else {
         $error = true;
     }
 }
 
-
+// Update
 if (isset($_GET["action"]) && $_GET["action"] == "edit" && isset($_GET["id"])) {
     if ($id > 0) {
         $user = Employees::get_by_key($id);
@@ -52,25 +57,20 @@ if (isset($_GET["action"]) && $_GET["action"] == "edit" && isset($_GET["id"])) {
 }
 
 // Delete
-// if (isset($_GET["action"]) && $_GET["action"] == "delete" && isset($_GET["id"])) {
-//     if ($id > 0) {
-//         $user = Employees::get_by_key($id);
-//         if ($user->delete()) {
-//             header("Location: index.php");
-//         }
-//     }
-// }
+if (isset($_GET["action"]) && $_GET["action"] == "delete" && isset($_GET["id"])) {
+    $id = filter_input(INPUT_GET, "id", FILTER_SANITIZE_NUMBER_INT);
+    if ($id > 0) {
+        $user = Employees::get_by_key($id);
+        if ($user->delete()) {
+            $_SESSION["msg"] = "Successflly delete employee";
+            header("location: index.php");
+            session_write_close();
+            exit;
+        }
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
+// Reading from database
 $result = Employees::get_all();
 
 ?>
@@ -89,13 +89,15 @@ $result = Employees::get_all();
     <form method="post" style="width: 50%; margin:auto; padding-top:100px;">
         <?php if (isset($error)) : ?>
             <div class="alert alert-danger" role="alert">
-                Please fill out the form
+                Please fill out this form
             </div>
         <?php endif ?>
 
-        <?php if (isset($msg)) : ?>
+        <?php if (isset($_SESSION["msg"])) : ?>
             <div class="alert alert-primary" role="alert" style="background-color: #d3ffda;">
-                Successfly saved information
+                <?php echo $_SESSION["msg"];
+                unset($_SESSION["msg"]);
+                ?>
             </div>
         <?php endif ?>
 
@@ -157,7 +159,7 @@ $result = Employees::get_all();
                         <td><?= $val->address ?></td>
                         <td>
                             <a href="/employees_form/?action=edit&id=<?= $val->id ?>"><button type="button" class="btn btn-info">Edit</button></a>
-                            <!-- <a href="/employees_form/?action=delete&id=<?= $val->id ?>" onclick="if(!confirm('Do you want to delete this employee ?')) return false;"><i class=" fa fa-time"></i><button type=" button" class="btn btn-danger">Delete</button></a> -->
+                            <a href="/employees_form/?action=delete&id=<?= $val->id ?>" onclick="if(!confirm('Do you want to delete this employee ?')) return false;"><i class=" fa fa-time"></i><button type=" button" class="btn btn-danger">Delete</button></a>
                         </td>
 
                     </tr>

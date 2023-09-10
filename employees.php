@@ -2,13 +2,14 @@
 require_once "abstract_model.php";
 class Employees extends AbstractModel
 {
+    public $id;
     public $name;
     public $email;
     public $age;
     public $salary;
     public $address;
 
-    protected static $table_name = "user";
+    protected static $table_name = "employees";
     protected static $primary_key = "id";
 
     protected static $table_schema = [
